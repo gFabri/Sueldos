@@ -37,4 +37,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ghcr.io/gfabri/docker-images/sueldos:latest
+            ghcr.io/gfabri/docker-images/gestion:latest
+

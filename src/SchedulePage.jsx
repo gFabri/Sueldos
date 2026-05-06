@@ -3,8 +3,8 @@
 const LOGIN_ENDPOINT = '/api/autogestion/login.php'
 const EMPLOYEE_NUMBER = '29548'
 const PASSWORD = '52059150'
-const STORAGE_KEY = 'sueldos_schedule_cache_v1'
-const AUTO_SYNC_KEY = 'sueldos_schedule_last_auto_sync'
+const STORAGE_KEY = 'gestion_schedule_cache_v1'
+const AUTO_SYNC_KEY = 'gestion_schedule_last_auto_sync'
 
 const DEFAULT_DAYS = [
   { day: 'Lunes', shift: 'Sin datos', hours: '--', isRest: false },
@@ -387,3 +387,4 @@ function SchedulePage() {
 }
 
 export default SchedulePage
+

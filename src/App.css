@@ -312,6 +312,82 @@ td {
 }
 
 @media (max-width: 760px) {
+  .app-shell {
+    padding: 12px 8px;
+  }
+
+  .panel {
+    border-radius: 12px;
+  }
+
+  .header,
+  .controls,
+  .tabs-wrap,
+  .top-nav,
+  .schedule-page {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .header {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .header h1 {
+    font-size: 1.2rem;
+  }
+
+  .controls {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .tabs-wrap {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: none;
+  }
+
+  .tabs-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .month-editor {
+    margin: 0 12px 12px;
+    padding: 10px;
+  }
+
+  .month-editor h2 {
+    font-size: 0.95rem;
+  }
+
+  .table-wrap {
+    border-top: 1px solid rgba(129, 184, 255, 0.2);
+  }
+
+  th,
+  td {
+    padding: 8px 9px;
+    font-size: 0.82rem;
+  }
+
+  .small-input {
+    max-width: 100%;
+    min-width: 70px;
+  }
+
+  .schedule-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .schedule-card {
+    padding: 10px;
+  }
+
   .special-days-controls {
     grid-template-columns: 1fr;
   }

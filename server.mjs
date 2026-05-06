@@ -29,5 +29,6 @@ app.get('*', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Sueldos app listening on ${port}`)
+  console.log(`Gestion app listening on ${port}`)
 })
+
