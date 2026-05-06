@@ -1,7 +1,7 @@
 ﻿services:
-  sueldos-app:
+  gestion-app:
     build: .
-    container_name: sueldos-app
+    container_name: gestion-app
     ports:
       - "8080:8080"
     restart: unless-stopped
