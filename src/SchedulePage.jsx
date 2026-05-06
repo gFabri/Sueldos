@@ -101,12 +101,7 @@ function parseScheduleFromHtml(html) {
         w.dayNumbers.some((d) => d !== null && Number(d) === currentDayNum),
     )
 
-    let selectedIndex = currentIndex >= 0 ? currentIndex : 0
-    // Si cae en el ultimo bloque y hay mas de uno, tomamos el anterior como "actual"
-    // para poder mostrar siguiente en el segundo bloque.
-    if (selectedIndex === weekBlocks.length - 1 && weekBlocks.length > 1) {
-      selectedIndex = weekBlocks.length - 2
-    }
+    const selectedIndex = currentIndex >= 0 ? currentIndex : weekBlocks.length - 1
 
     const currentWeek = weekBlocks[selectedIndex]?.rows || [...DEFAULT_DAYS]
     const nextWeek = weekBlocks[selectedIndex + 1]?.rows || [...DEFAULT_DAYS]
