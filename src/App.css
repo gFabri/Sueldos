@@ -1,0 +1,318 @@
+﻿.app-shell {
+  min-height: 100vh;
+  padding: 30px 20px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(66, 124, 191, 0.35), transparent 45%),
+    radial-gradient(circle at 85% 0%, rgba(41, 88, 145, 0.35), transparent 40%),
+    linear-gradient(135deg, #051326, #0a1f3f 55%, #0f2e57);
+  color: #e8f2ff;
+}
+
+.panel {
+  width: min(1420px, 100%);
+  margin: 0 auto;
+  border-radius: 18px;
+  border: 1px solid rgba(129, 184, 255, 0.22);
+  background: linear-gradient(180deg, rgba(13, 38, 73, 0.88), rgba(8, 26, 51, 0.9));
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.header {
+  padding: 22px;
+  border-bottom: 1px solid rgba(129, 184, 255, 0.22);
+  background: linear-gradient(90deg, rgba(101, 169, 255, 0.16), rgba(101, 169, 255, 0));
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.2vw, 2rem);
+}
+
+.header p {
+  margin: 8px 0 0;
+  color: #bdd5f8;
+  overflow-wrap: anywhere;
+}
+
+.controls {
+  padding: 16px 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: #c7dcfb;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(129, 184, 255, 0.35);
+  border-radius: 10px;
+  background: rgba(9, 31, 62, 0.9);
+  color: #eff6ff;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: #64a9ff;
+}
+
+.table-wrap {
+  border-top: 1px solid rgba(129, 184, 255, 0.2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.table-wrap::-webkit-scrollbar {
+  display: none;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(129, 184, 255, 0.13);
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+th {
+  color: #a7c6f0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+td {
+  color: #e8f1ff;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.small-input {
+  max-width: 88px;
+  padding: 7px 8px;
+  border-radius: 8px;
+}
+
+.salary {
+  color: #89e5bc;
+  font-weight: 700;
+}
+
+.tabs-wrap {
+  padding: 8px 22px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.month-tab {
+  border: 1px solid rgba(129, 184, 255, 0.3);
+  background: rgba(10, 33, 65, 0.8);
+  color: #d8e8ff;
+  border-radius: 10px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.month-tab.is-active {
+  border-color: #64a9ff;
+  background: rgba(47, 106, 176, 0.35);
+}
+
+.top-nav {
+  padding: 16px 22px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.month-editor {
+  margin: 0 22px 16px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(129, 184, 255, 0.25);
+  background: rgba(8, 29, 57, 0.82);
+}
+
+.month-editor h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.month-editor p {
+  margin: 6px 0 12px;
+  color: #bfd7fa;
+}
+
+.month-editor small {
+  color: #a9c7ef;
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.rest-days-picker {
+  margin-bottom: 8px;
+}
+
+.rest-days-picker > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #cfe1fb;
+}
+
+.weekday-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.weekday-btn {
+  border: 1px solid rgba(129, 184, 255, 0.3);
+  background: rgba(10, 33, 65, 0.8);
+  color: #d8e8ff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.weekday-btn.is-on {
+  border-color: #64a9ff;
+  background: rgba(47, 106, 176, 0.35);
+}
+
+.special-days {
+  margin-bottom: 10px;
+}
+
+.special-days > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #cfe1fb;
+}
+
+.special-days-controls {
+  display: grid;
+  grid-template-columns: minmax(170px, 220px) minmax(180px, 260px) auto;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.special-days-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid rgba(129, 184, 255, 0.3);
+  border-radius: 999px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #e8f2ff;
+  background: rgba(10, 33, 65, 0.8);
+}
+
+.chip-rest {
+  border-color: rgba(118, 218, 171, 0.4);
+  background: rgba(23, 84, 63, 0.45);
+}
+
+.chip-work {
+  border-color: rgba(255, 205, 120, 0.4);
+  background: rgba(117, 82, 20, 0.45);
+}
+
+.schedule-page {
+  padding: 16px 22px 24px;
+}
+
+.schedule-header h2 {
+  margin: 0 0 8px;
+}
+
+.schedule-header p {
+  margin: 0 0 14px;
+  color: #bfd7fa;
+}
+
+.schedule-actions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.schedule-login-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.schedule-actions small {
+  color: #a9c7ef;
+}
+
+.schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.schedule-card {
+  border: 1px solid rgba(129, 184, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(8, 29, 57, 0.82);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.schedule-card.is-rest-day {
+  border-color: rgba(120, 220, 150, 0.6);
+  background: rgba(20, 84, 50, 0.55);
+}
+
+.schedule-card span {
+  color: #d8e8ff;
+}
+
+.schedule-card small {
+  color: #a9c7ef;
+}
+
+.schedule-section-title {
+  margin: 6px 0 10px;
+  font-size: 1rem;
+  color: #d8e8ff;
+}
+
+@media (max-width: 760px) {
+  .special-days-controls {
+    grid-template-columns: 1fr;
+  }
+}
