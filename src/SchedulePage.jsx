@@ -362,7 +362,6 @@ function SchedulePage() {
           <article key={`current-${item.day}`} className={`schedule-card ${item.isRest ? 'is-rest-day' : ''}`}>
             <strong>{item.day}</strong>
             <span>{item.shift}</span>
-            <small>Horas: {item.hours}</small>
           </article>
         ))}
       </div>
@@ -373,7 +372,6 @@ function SchedulePage() {
           <article key={`next-${item.day}`} className={`schedule-card ${item.isRest ? 'is-rest-day' : ''}`}>
             <strong>{item.day}</strong>
             <span>{item.shift}</span>
-            <small>Horas: {item.hours}</small>
           </article>
         ))}
       </div>
