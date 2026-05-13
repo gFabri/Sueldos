@@ -9,6 +9,7 @@ const FONASA_RATE = 0.045
 const FRL_RATE = 0.001
 const FLORERIA_MVD = 18
 const FOOD_TICKET_RATE = 0.0695
+const PRESENTISMO_PER_HALF = 1350
 const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
 
 function formatMoney(value) {
@@ -75,6 +76,8 @@ function App() {
   )
   const [monthlyForcedRestDates, setMonthlyForcedRestDates] = useState(Array.from({ length: 12 }, () => []))
   const [monthlyForcedWorkDates, setMonthlyForcedWorkDates] = useState(Array.from({ length: 12 }, () => []))
+  const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(false))
+  const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(false))
   const [newSpecialDate, setNewSpecialDate] = useState('')
   const [newSpecialType, setNewSpecialType] = useState('rest')
 
@@ -111,6 +114,10 @@ function App() {
       const taxes = monthSalary * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
       const liquidSalary = Math.max(0, monthSalary - taxes - FLORERIA_MVD)
       const foodTicket = monthSalary * FOOD_TICKET_RATE
+      const presentismo =
+        (monthlyPresentismoLostQ1[monthIndex] ? 0 : PRESENTISMO_PER_HALF) +
+        (monthlyPresentismoLostQ2[monthIndex] ? 0 : PRESENTISMO_PER_HALF)
+      const totalToCollect = liquidSalary + presentismo
 
       return {
         key: `${year}-${monthIndex}`,
@@ -130,6 +137,8 @@ function App() {
         monthSalary,
         liquidSalary,
         foodTicket,
+        presentismo,
+        totalToCollect,
         forcedRestDates: monthlyForcedRestDates[monthIndex],
         forcedWorkDates: monthlyForcedWorkDates[monthIndex],
       }
@@ -142,6 +151,8 @@ function App() {
     monthlyRestDays,
     monthlyForcedRestDates,
     monthlyForcedWorkDates,
+    monthlyPresentismoLostQ1,
+    monthlyPresentismoLostQ2,
     hoursPerDay,
   ])
 
@@ -205,6 +216,22 @@ function App() {
     } else {
       setMonthlyForcedWorkDates((prev) => prev.map((dates, idx) => (idx === activeMonth ? dates.filter((d) => d !== date) : dates)))
     }
+  }
+
+  const togglePresentismoQ1 = (monthIndex) => {
+    setMonthlyPresentismoLostQ1((prev) => {
+      const next = [...prev]
+      next[monthIndex] = !next[monthIndex]
+      return next
+    })
+  }
+
+  const togglePresentismoQ2 = (monthIndex) => {
+    setMonthlyPresentismoLostQ2((prev) => {
+      const next = [...prev]
+      next[monthIndex] = !next[monthIndex]
+      return next
+    })
   }
 
   const activePeriod = periods[activeMonth]
@@ -307,6 +334,24 @@ function App() {
                 placeholder="Ej: 18"
               />
             </label>
+
+            <label>
+              Presentismo 1ra quincena (perdido)
+              <input
+                type="checkbox"
+                checked={monthlyPresentismoLostQ1[activeMonth]}
+                onChange={() => togglePresentismoQ1(activeMonth)}
+              />
+            </label>
+
+            <label>
+              Presentismo 2da quincena (perdido)
+              <input
+                type="checkbox"
+                checked={monthlyPresentismoLostQ2[activeMonth]}
+                onChange={() => togglePresentismoQ2(activeMonth)}
+              />
+            </label>
           </div>
           <div className="rest-days-picker">
             <span>Días libres para este mes:</span>
@@ -360,6 +405,7 @@ function App() {
               ? ` Manual aplicado: ${activePeriod.finalWorkDays} días.`
               : ' Sin override manual.'}
             {` Ticket alimentación auto: ${(FOOD_TICKET_RATE * 100).toFixed(2)}% del sueldo.`}
+            {` Presentismo: ${formatMoney(activePeriod.presentismo)} (1350 por quincena).`}
           </small>
         </section>
 
@@ -369,17 +415,16 @@ function App() {
               <tr>
                 <th>Mes</th>
                 <th>Período</th>
-                <th>Domingos</th>
-                <th>Lunes</th>
                 <th>Descanso</th>
                 <th>Días base</th>
                 <th>Descuento opcional</th>
                 <th>Días finales</th>
-                <th>Tipo</th>
                 <th>Horas trabajadas</th>
                 <th>Sueldo mes</th>
                 <th>Líquido</th>
                 <th>Ticket alimentación</th>
+                <th>Presentismo</th>
+                <th>Total a cobrar</th>
               </tr>
             </thead>
             <tbody>
@@ -387,8 +432,6 @@ function App() {
                 <tr key={period.key}>
                   <td className="capitalize">{period.label}</td>
                   <td>{period.periodText}</td>
-                  <td>{period.sundays}</td>
-                  <td>{period.mondays}</td>
                   <td>{period.restDays}</td>
                   <td>{period.baseWorkDays}</td>
                   <td>
@@ -402,11 +445,12 @@ function App() {
                     />
                   </td>
                   <td>{period.finalWorkDays}</td>
-                  <td>{period.hasManualFinalDays ? 'Manual' : 'Auto'}</td>
                   <td>{period.workedHours}</td>
                   <td className="salary">{formatMoney(period.monthSalary)}</td>
                   <td className="salary">{formatMoney(period.liquidSalary)}</td>
                   <td className="salary">{formatMoney(period.foodTicket)}</td>
+                  <td className="salary">{formatMoney(period.presentismo)}</td>
+                  <td className="salary">{formatMoney(period.totalToCollect)}</td>
                 </tr>
               ))}
             </tbody>

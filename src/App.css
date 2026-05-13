@@ -66,6 +66,13 @@ select:focus {
   border-color: #64a9ff;
 }
 
+input[type='checkbox'] {
+  width: auto;
+  padding: 0;
+  transform: scale(1.15);
+  justify-self: start;
+}
+
 .table-wrap {
   border-top: 1px solid rgba(129, 184, 255, 0.2);
   overflow-x: auto;
