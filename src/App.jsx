@@ -1,8 +1,9 @@
 ﻿import { useMemo, useState } from 'react'
 import './App.css'
 import SchedulePage from './SchedulePage'
+import GestionPage from './GestionPage'
 
-const DEFAULT_HOURLY_RATE = 170
+const DEFAULT_HOURLY_RATE = 170.39
 const DEFAULT_HOURS_PER_DAY = 8
 const JUBILACION_RATE = 0.15
 const FONASA_RATE = 0.045
@@ -31,12 +32,21 @@ function formatIsoDate(date) {
   return `${year}-${month}-${day}`
 }
 
+function parseIsoDate(value) {
+  const [y, m, d] = value.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 function getPeriodStart(year, monthIndex) {
   return new Date(year, monthIndex - 1, 26)
 }
 
 function getPeriodEndExclusive(start) {
   return new Date(start.getFullYear(), start.getMonth() + 1, 26)
+}
+
+function monthDiff(startDate, endDate) {
+  return (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth())
 }
 
 function countDays(startInclusive, endExclusive, restDaysConfig, forcedRestSet, forcedWorkSet) {
@@ -66,6 +76,7 @@ function countDays(startInclusive, endExclusive, restDaysConfig, forcedRestSet, 
 function App() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
+  const [employmentStartDate, setEmploymentStartDate] = useState('2026-02-12')
   const [hourlyRate, setHourlyRate] = useState(DEFAULT_HOURLY_RATE)
   const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY)
   const [activeMonth, setActiveMonth] = useState(now.getMonth())
@@ -76,26 +87,46 @@ function App() {
   )
   const [monthlyForcedRestDates, setMonthlyForcedRestDates] = useState(Array.from({ length: 12 }, () => []))
   const [monthlyForcedWorkDates, setMonthlyForcedWorkDates] = useState(Array.from({ length: 12 }, () => []))
-  const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(false))
-  const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(false))
+  const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(true))
+  const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(true))
+  const [monthlyFloreria, setMonthlyFloreria] = useState(Array(12).fill(FLORERIA_MVD))
+  const [monthlyTicketManual, setMonthlyTicketManual] = useState(Array(12).fill(''))
   const [newSpecialDate, setNewSpecialDate] = useState('')
   const [newSpecialType, setNewSpecialType] = useState('rest')
 
   const dailyPay = Math.max(0, Number(hourlyRate) || 0) * Math.max(0, Number(hoursPerDay) || 0)
   const periods = useMemo(() => {
-    return Array.from({ length: 12 }, (_, monthIndex) => {
+    const monthNamesOrder = [
+      'enero',
+      'febrero',
+      'marzo',
+      'abril',
+      'mayo',
+      'junio',
+      'julio',
+      'agosto',
+      'septiembre',
+      'octubre',
+      'noviembre',
+      'diciembre',
+    ]
+
+    const rows = Array.from({ length: 12 }, (_, monthIndex) => {
       const start = getPeriodStart(Number(year), monthIndex)
       const endExclusive = getPeriodEndExclusive(start)
       const endVisible = new Date(endExclusive)
       endVisible.setDate(endVisible.getDate() - 1)
       const startIso = formatIsoDate(start)
       const endIso = formatIsoDate(endVisible)
+      const employmentStart = parseIsoDate(employmentStartDate)
+      const effectiveStart = employmentStart > start ? employmentStart : start
+      const isBeforeEmployment = effectiveStart >= endExclusive
 
       const restConfig = monthlyRestDays[monthIndex]
       const forcedRestSet = new Set(monthlyForcedRestDates[monthIndex])
       const forcedWorkSet = new Set(monthlyForcedWorkDates[monthIndex])
       const { totalDays, sundays, mondays, restDays } = countDays(
-        start,
+        isBeforeEmployment ? endExclusive : effectiveStart,
         endExclusive,
         restConfig,
         forcedRestSet,
@@ -109,15 +140,22 @@ function App() {
       const finalWorkDays = hasManualFinalDays
         ? Math.max(0, Number(manualFinalDaysRaw) || 0)
         : autoFinalWorkDays
+      const monthDailyPay = Math.max(0, Number(hourlyRate) || 0) * Math.max(0, Number(hoursPerDay) || 0)
       const workedHours = finalWorkDays * Math.max(0, Number(hoursPerDay) || 0)
-      const monthSalary = finalWorkDays * dailyPay
+      const monthSalary = finalWorkDays * monthDailyPay
       const taxes = monthSalary * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
-      const liquidSalary = Math.max(0, monthSalary - taxes - FLORERIA_MVD)
-      const foodTicket = monthSalary * FOOD_TICKET_RATE
-      const presentismo =
-        (monthlyPresentismoLostQ1[monthIndex] ? 0 : PRESENTISMO_PER_HALF) +
-        (monthlyPresentismoLostQ2[monthIndex] ? 0 : PRESENTISMO_PER_HALF)
+      const floreria = Math.max(0, Number(monthlyFloreria[monthIndex]) || 0)
+      const liquidSalary = Math.max(0, monthSalary - taxes - floreria)
+      const ticketManual = Number(monthlyTicketManual[monthIndex]) || 0
+      const foodTicket = ticketManual > 0 ? ticketManual : monthSalary * FOOD_TICKET_RATE
+      const monthsWorked = monthDiff(employmentStart, endVisible)
+      const presentismoEnabled = monthsWorked >= 2
+      const presentismo = presentismoEnabled
+        ? (monthlyPresentismoLostQ1[monthIndex] ? 0 : PRESENTISMO_PER_HALF) +
+          (monthlyPresentismoLostQ2[monthIndex] ? 0 : PRESENTISMO_PER_HALF)
+        : 0
       const totalToCollect = liquidSalary + presentismo
+      const nominalForAguinaldo = monthSalary + presentismo
 
       return {
         key: `${year}-${monthIndex}`,
@@ -137,12 +175,33 @@ function App() {
         monthSalary,
         liquidSalary,
         foodTicket,
+        floreria,
+        presentismoEnabled,
         presentismo,
         totalToCollect,
+        nominalForAguinaldo,
+        monthNameLower: endVisible.toLocaleDateString('es-UY', { month: 'long' }).toLowerCase(),
         forcedRestDates: monthlyForcedRestDates[monthIndex],
         forcedWorkDates: monthlyForcedWorkDates[monthIndex],
       }
     })
+
+    const firstSemesterSet = new Set(monthNamesOrder.slice(0, 5)) // ene-may
+    const secondSemesterSet = new Set(monthNamesOrder.slice(5, 11)) // jun-nov
+
+    const cuotaJunio = rows
+      .filter((r) => firstSemesterSet.has(r.monthNameLower))
+      .reduce((acc, r) => acc + r.nominalForAguinaldo, 0) / 12
+    const cuotaDiciembre = rows
+      .filter((r) => secondSemesterSet.has(r.monthNameLower))
+      .reduce((acc, r) => acc + r.nominalForAguinaldo, 0) / 12
+
+    rows.cuotaJunio = cuotaJunio
+    rows.cuotaDiciembre = cuotaDiciembre
+    rows.forEach((row) => {
+      row.aguinaldoPeriodo = firstSemesterSet.has(row.monthNameLower) ? cuotaJunio : cuotaDiciembre
+    })
+    return rows
   }, [
     year,
     dailyPay,
@@ -151,8 +210,11 @@ function App() {
     monthlyRestDays,
     monthlyForcedRestDates,
     monthlyForcedWorkDates,
+    employmentStartDate,
     monthlyPresentismoLostQ1,
     monthlyPresentismoLostQ2,
+    monthlyFloreria,
+    monthlyTicketManual,
     hoursPerDay,
   ])
 
@@ -234,8 +296,33 @@ function App() {
     })
   }
 
+  const handleFloreriaChange = (index, value) => {
+    setMonthlyFloreria((prev) => {
+      const next = [...prev]
+      next[index] = value
+      return next
+    })
+  }
+
+  const handleTicketManualChange = (index, value) => {
+    setMonthlyTicketManual((prev) => {
+      const next = [...prev]
+      next[index] = value
+      return next
+    })
+  }
+
+  const handleCollectedManualChange = (index, value) => {
+    setMonthlyCollectedManual((prev) => {
+      const next = [...prev]
+      next[index] = value
+      return next
+    })
+  }
+
   const activePeriod = periods[activeMonth]
   const isHorariosRoute = window.location.pathname.toLowerCase().startsWith('/horarios')
+  const isGestionRoute = window.location.pathname.toLowerCase().startsWith('/gestion')
 
   if (isHorariosRoute) {
     return (
@@ -247,6 +334,15 @@ function App() {
     )
   }
 
+  if (isGestionRoute) {
+    return (
+      <main className="app-shell">
+        <section className="panel">
+          <GestionPage />
+        </section>
+      </main>
+    )
+  }
   return (
     <main className="app-shell">
       <section className="panel">
@@ -268,11 +364,20 @@ function App() {
           </label>
 
           <label>
+            Fecha de ingreso
+            <input
+              type="date"
+              value={employmentStartDate}
+              onChange={(e) => setEmploymentStartDate(e.target.value)}
+            />
+          </label>
+
+          <label>
             Pago por hora
             <input
               type="number"
               min="0"
-              step="1"
+              step="0.01"
               value={hourlyRate}
               onChange={(e) => setHourlyRate(e.target.value)}
             />
@@ -292,6 +397,16 @@ function App() {
           <label>
             Pago por día (calculado)
             <input type="text" value={formatMoney(dailyPay)} readOnly />
+          </label>
+
+          <label>
+            Aguinaldo estimado (cuota junio)
+            <input type="text" value={formatMoney(periods.cuotaJunio || 0)} readOnly />
+          </label>
+
+          <label>
+            Aguinaldo estimado (cuota diciembre)
+            <input type="text" value={formatMoney(periods.cuotaDiciembre || 0)} readOnly />
           </label>
         </div>
 
@@ -340,6 +455,7 @@ function App() {
               <input
                 type="checkbox"
                 checked={monthlyPresentismoLostQ1[activeMonth]}
+                disabled={!activePeriod.presentismoEnabled}
                 onChange={() => togglePresentismoQ1(activeMonth)}
               />
             </label>
@@ -349,7 +465,31 @@ function App() {
               <input
                 type="checkbox"
                 checked={monthlyPresentismoLostQ2[activeMonth]}
+                disabled={!activePeriod.presentismoEnabled}
                 onChange={() => togglePresentismoQ2(activeMonth)}
+              />
+            </label>
+
+            <label>
+              Florería del mes
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={monthlyFloreria[activeMonth]}
+                onChange={(e) => handleFloreriaChange(activeMonth, e.target.value)}
+              />
+            </label>
+
+            <label>
+              Ticket manual del mes
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={monthlyTicketManual[activeMonth]}
+                onChange={(e) => handleTicketManualChange(activeMonth, e.target.value)}
+                placeholder="vacío = automático"
               />
             </label>
           </div>
@@ -406,6 +546,7 @@ function App() {
               : ' Sin override manual.'}
             {` Ticket alimentación auto: ${(FOOD_TICKET_RATE * 100).toFixed(2)}% del sueldo.`}
             {` Presentismo: ${formatMoney(activePeriod.presentismo)} (1350 por quincena).`}
+            {!activePeriod.presentismoEnabled ? ' Se habilita desde el 3er mes laboral.' : ''}
           </small>
         </section>
 
@@ -421,10 +562,13 @@ function App() {
                 <th>Días finales</th>
                 <th>Horas trabajadas</th>
                 <th>Sueldo mes</th>
-                <th>Líquido</th>
+                <th>Líquido calc.</th>
+                
+                <th>Florería</th>
                 <th>Ticket alimentación</th>
                 <th>Presentismo</th>
                 <th>Total a cobrar</th>
+                <th>Aguinaldo período</th>
               </tr>
             </thead>
             <tbody>
@@ -448,9 +592,11 @@ function App() {
                   <td>{period.workedHours}</td>
                   <td className="salary">{formatMoney(period.monthSalary)}</td>
                   <td className="salary">{formatMoney(period.liquidSalary)}</td>
+                  <td>{formatMoney(period.floreria)}</td>
                   <td className="salary">{formatMoney(period.foodTicket)}</td>
                   <td className="salary">{formatMoney(period.presentismo)}</td>
                   <td className="salary">{formatMoney(period.totalToCollect)}</td>
+                  <td className="salary">{formatMoney(period.aguinaldoPeriodo)}</td>
                 </tr>
               ))}
             </tbody>
@@ -462,6 +608,11 @@ function App() {
 }
 
 export default App
+
+
+
+
+
 
 
 
