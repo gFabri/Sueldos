@@ -3,13 +3,15 @@ import './App.css'
 import SchedulePage from './SchedulePage'
 import GestionPage from './GestionPage'
 
-const DEFAULT_HOURLY_RATE = 170.39
+const DEFAULT_HOURLY_RATE = 170.67
 const DEFAULT_HOURS_PER_DAY = 8
 const JUBILACION_RATE = 0.15
 const FONASA_RATE = 0.045
 const FRL_RATE = 0.001
 const FLORERIA_MVD = 18
-const FOOD_TICKET_RATE = 0.0695
+const FOOD_TICKET_PER_160_HOURS = 1890.91
+const FOOD_TICKET_HOURS_BASE = 160
+const FOOD_TICKET_PER_HOUR = FOOD_TICKET_PER_160_HOURS / FOOD_TICKET_HOURS_BASE
 const PRESENTISMO_PER_HALF = 1350
 const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
 
@@ -23,6 +25,10 @@ function formatMoney(value) {
 
 function formatDate(date) {
   return date.toLocaleDateString('es-UY')
+}
+
+function roundMoney(value) {
+  return Math.round((Number(value) || 0) * 100) / 100
 }
 
 function formatIsoDate(date) {
@@ -142,18 +148,19 @@ function App() {
         : autoFinalWorkDays
       const monthDailyPay = Math.max(0, Number(hourlyRate) || 0) * Math.max(0, Number(hoursPerDay) || 0)
       const workedHours = finalWorkDays * Math.max(0, Number(hoursPerDay) || 0)
-      const monthSalary = finalWorkDays * monthDailyPay
-      const taxes = monthSalary * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
-      const floreria = Math.max(0, Number(monthlyFloreria[monthIndex]) || 0)
-      const liquidSalary = Math.max(0, monthSalary - taxes - floreria)
-      const ticketManual = Number(monthlyTicketManual[monthIndex]) || 0
-      const foodTicket = ticketManual > 0 ? ticketManual : monthSalary * FOOD_TICKET_RATE
       const monthsWorked = monthDiff(employmentStart, endVisible)
       const presentismoEnabled = monthsWorked >= 2
       const presentismo = presentismoEnabled
         ? (monthlyPresentismoLostQ1[monthIndex] ? 0 : PRESENTISMO_PER_HALF) +
           (monthlyPresentismoLostQ2[monthIndex] ? 0 : PRESENTISMO_PER_HALF)
         : 0
+      const monthSalary = finalWorkDays * monthDailyPay
+      const taxableSalary = monthSalary + presentismo
+      const taxes = taxableSalary * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
+      const floreria = Math.max(0, Number(monthlyFloreria[monthIndex]) || 0)
+      const liquidSalary = Math.max(0, monthSalary - taxes - floreria)
+      const ticketManual = Number(monthlyTicketManual[monthIndex]) || 0
+      const foodTicket = ticketManual > 0 ? ticketManual : roundMoney(workedHours * FOOD_TICKET_PER_HOUR)
       const totalToCollect = liquidSalary + presentismo
       const nominalForAguinaldo = monthSalary + presentismo
 
@@ -204,7 +211,6 @@ function App() {
     return rows
   }, [
     year,
-    dailyPay,
     monthlyUnpaidDays,
     monthlyManualFinalDays,
     monthlyRestDays,
@@ -215,6 +221,7 @@ function App() {
     monthlyPresentismoLostQ2,
     monthlyFloreria,
     monthlyTicketManual,
+    hourlyRate,
     hoursPerDay,
   ])
 
@@ -312,15 +319,8 @@ function App() {
     })
   }
 
-  const handleCollectedManualChange = (index, value) => {
-    setMonthlyCollectedManual((prev) => {
-      const next = [...prev]
-      next[index] = value
-      return next
-    })
-  }
-
   const activePeriod = periods[activeMonth]
+  const nextAguinaldo = now.getMonth() <= 5 ? periods.cuotaJunio : periods.cuotaDiciembre
   const isHorariosRoute = window.location.pathname.toLowerCase().startsWith('/horarios')
   const isGestionRoute = window.location.pathname.toLowerCase().startsWith('/gestion')
 
@@ -400,13 +400,8 @@ function App() {
           </label>
 
           <label>
-            Aguinaldo estimado (cuota junio)
-            <input type="text" value={formatMoney(periods.cuotaJunio || 0)} readOnly />
-          </label>
-
-          <label>
-            Aguinaldo estimado (cuota diciembre)
-            <input type="text" value={formatMoney(periods.cuotaDiciembre || 0)} readOnly />
+            Aguinaldo estimado
+            <input type="text" value={formatMoney(nextAguinaldo || 0)} readOnly />
           </label>
         </div>
 
@@ -544,7 +539,7 @@ function App() {
             {activePeriod.hasManualFinalDays
               ? ` Manual aplicado: ${activePeriod.finalWorkDays} días.`
               : ' Sin override manual.'}
-            {` Ticket alimentación auto: ${(FOOD_TICKET_RATE * 100).toFixed(2)}% del sueldo.`}
+            {` Ticket alimentación auto: ${formatMoney(FOOD_TICKET_PER_160_HOURS)} cada ${FOOD_TICKET_HOURS_BASE} horas, proporcional a las horas trabajadas.`}
             {` Presentismo: ${formatMoney(activePeriod.presentismo)} (1350 por quincena).`}
             {!activePeriod.presentismoEnabled ? ' Se habilita desde el 3er mes laboral.' : ''}
           </small>
@@ -555,7 +550,6 @@ function App() {
             <thead>
               <tr>
                 <th>Mes</th>
-                <th>Período</th>
                 <th>Descanso</th>
                 <th>Días base</th>
                 <th>Descuento opcional</th>
@@ -563,19 +557,15 @@ function App() {
                 <th>Horas trabajadas</th>
                 <th>Sueldo mes</th>
                 <th>Líquido calc.</th>
-                
-                <th>Florería</th>
                 <th>Ticket alimentación</th>
                 <th>Presentismo</th>
                 <th>Total a cobrar</th>
-                <th>Aguinaldo período</th>
               </tr>
             </thead>
             <tbody>
               {periods.map((period, index) => (
                 <tr key={period.key}>
                   <td className="capitalize">{period.label}</td>
-                  <td>{period.periodText}</td>
                   <td>{period.restDays}</td>
                   <td>{period.baseWorkDays}</td>
                   <td>
@@ -592,11 +582,9 @@ function App() {
                   <td>{period.workedHours}</td>
                   <td className="salary">{formatMoney(period.monthSalary)}</td>
                   <td className="salary">{formatMoney(period.liquidSalary)}</td>
-                  <td>{formatMoney(period.floreria)}</td>
                   <td className="salary">{formatMoney(period.foodTicket)}</td>
                   <td className="salary">{formatMoney(period.presentismo)}</td>
                   <td className="salary">{formatMoney(period.totalToCollect)}</td>
-                  <td className="salary">{formatMoney(period.aguinaldoPeriodo)}</td>
                 </tr>
               ))}
             </tbody>

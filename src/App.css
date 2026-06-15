@@ -119,30 +119,8 @@ td {
   color: #e8f1ff;
 }
 
-.salary-table-wrap th:nth-child(3),
-.salary-table-wrap th:nth-child(4),
-.salary-table-wrap th:nth-child(5),
-.salary-table-wrap th:nth-child(6),
-.salary-table-wrap th:nth-child(7),
-.salary-table-wrap th:nth-child(8),
-.salary-table-wrap th:nth-child(9),
-.salary-table-wrap th:nth-child(10),
-.salary-table-wrap th:nth-child(11),
-.salary-table-wrap th:nth-child(12),
-.salary-table-wrap th:nth-child(13),
-.salary-table-wrap th:nth-child(14),
-.salary-table-wrap td:nth-child(3),
-.salary-table-wrap td:nth-child(4),
-.salary-table-wrap td:nth-child(5),
-.salary-table-wrap td:nth-child(6),
-.salary-table-wrap td:nth-child(7),
-.salary-table-wrap td:nth-child(8),
-.salary-table-wrap td:nth-child(9),
-.salary-table-wrap td:nth-child(10),
-.salary-table-wrap td:nth-child(11),
-.salary-table-wrap td:nth-child(12),
-.salary-table-wrap td:nth-child(13),
-.salary-table-wrap td:nth-child(14),
+.salary-table-wrap th:nth-child(n + 2),
+.salary-table-wrap td:nth-child(n + 2),
 .expense-table-wrap th:nth-child(4),
 .expense-table-wrap td:nth-child(4) {
   text-align: right;
@@ -475,19 +453,16 @@ td {
   }
 
   .salary-table-wrap td:nth-child(1)::before { content: 'Mes'; }
-  .salary-table-wrap td:nth-child(2)::before { content: 'Periodo'; }
-  .salary-table-wrap td:nth-child(3)::before { content: 'Descanso'; }
-  .salary-table-wrap td:nth-child(4)::before { content: 'Dias base'; }
-  .salary-table-wrap td:nth-child(5)::before { content: 'Descuento'; }
-  .salary-table-wrap td:nth-child(6)::before { content: 'Dias finales'; }
-  .salary-table-wrap td:nth-child(7)::before { content: 'Horas'; }
-  .salary-table-wrap td:nth-child(8)::before { content: 'Sueldo'; }
-  .salary-table-wrap td:nth-child(9)::before { content: 'Liquido'; }
-  .salary-table-wrap td:nth-child(10)::before { content: 'Floreria'; }
-  .salary-table-wrap td:nth-child(11)::before { content: 'Ticket'; }
-  .salary-table-wrap td:nth-child(12)::before { content: 'Presentismo'; }
-  .salary-table-wrap td:nth-child(13)::before { content: 'Total'; }
-  .salary-table-wrap td:nth-child(14)::before { content: 'Aguinaldo'; }
+  .salary-table-wrap td:nth-child(2)::before { content: 'Descanso'; }
+  .salary-table-wrap td:nth-child(3)::before { content: 'Dias base'; }
+  .salary-table-wrap td:nth-child(4)::before { content: 'Descuento'; }
+  .salary-table-wrap td:nth-child(5)::before { content: 'Dias finales'; }
+  .salary-table-wrap td:nth-child(6)::before { content: 'Horas'; }
+  .salary-table-wrap td:nth-child(7)::before { content: 'Sueldo'; }
+  .salary-table-wrap td:nth-child(8)::before { content: 'Liquido'; }
+  .salary-table-wrap td:nth-child(9)::before { content: 'Ticket'; }
+  .salary-table-wrap td:nth-child(10)::before { content: 'Presentismo'; }
+  .salary-table-wrap td:nth-child(11)::before { content: 'Total'; }
 
   .expense-table-wrap td:nth-child(1)::before { content: 'Fecha'; }
   .expense-table-wrap td:nth-child(2)::before { content: 'Categoria'; }
@@ -505,7 +480,6 @@ td {
   }
 
   .salary-table-wrap td:nth-child(1),
-  .salary-table-wrap td:nth-child(2),
   .expense-table-wrap td:nth-child(1),
   .expense-table-wrap td:nth-child(2),
   .expense-table-wrap td:nth-child(3),
@@ -531,5 +505,137 @@ td {
 
   .special-days-controls {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Final theme overrides */
+.app-shell {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(112, 24, 214, 0.34), transparent 42%),
+    radial-gradient(circle at 86% 0%, rgba(156, 36, 214, 0.22), transparent 38%),
+    linear-gradient(135deg, #07020d, #160622 48%, #26063f);
+  color: #f7efff;
+}
+
+.panel {
+  border-color: rgba(183, 92, 255, 0.28);
+  background: linear-gradient(180deg, rgba(40, 10, 67, 0.92), rgba(13, 4, 22, 0.96));
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.52);
+}
+
+.header {
+  border-bottom-color: rgba(183, 92, 255, 0.28);
+  background: linear-gradient(90deg, rgba(126, 35, 218, 0.26), rgba(126, 35, 218, 0));
+}
+
+.header p,
+.month-editor p,
+.schedule-header p {
+  color: #dbc4f7;
+}
+
+label,
+.rest-days-picker > span,
+.special-days > span {
+  color: #eadcff;
+}
+
+input,
+select {
+  border-color: rgba(183, 92, 255, 0.38);
+  background: rgba(24, 7, 40, 0.94);
+  color: #fcf8ff;
+}
+
+input:focus,
+select:focus {
+  border-color: #c77dff;
+  box-shadow: 0 0 0 3px rgba(199, 125, 255, 0.16);
+}
+
+.table-wrap {
+  border-top-color: rgba(183, 92, 255, 0.22);
+}
+
+th,
+.table-wrap td::before {
+  color: #d6a8ff;
+}
+
+td {
+  color: #f4ebff;
+  border-bottom-color: rgba(183, 92, 255, 0.14);
+}
+
+.salary {
+  color: #f0d6ff;
+}
+
+.month-tab,
+.weekday-btn,
+.chip {
+  border-color: rgba(183, 92, 255, 0.36);
+  background: rgba(44, 11, 74, 0.86);
+  color: #f1e5ff;
+}
+
+.month-tab:hover,
+.weekday-btn:hover,
+.chip:hover {
+  border-color: rgba(215, 158, 255, 0.72);
+  background: rgba(64, 16, 106, 0.94);
+}
+
+.month-tab.is-active,
+.weekday-btn.is-on {
+  border-color: #c77dff;
+  background: rgba(119, 35, 190, 0.48);
+}
+
+.month-editor,
+.schedule-card {
+  border-color: rgba(183, 92, 255, 0.26);
+  background: rgba(24, 7, 40, 0.88);
+}
+
+.month-editor small,
+.schedule-actions small,
+.schedule-card small {
+  color: #d2b8ed;
+}
+
+.chip-rest,
+.schedule-card.is-rest-day {
+  border-color: rgba(199, 125, 255, 0.48);
+  background: rgba(60, 16, 95, 0.72);
+}
+
+.chip-work {
+  border-color: rgba(255, 187, 240, 0.46);
+  background: rgba(100, 24, 81, 0.52);
+}
+
+.schedule-card span,
+.schedule-section-title,
+.table-wrap td:first-child::before {
+  color: #f1e5ff;
+}
+
+@media (max-width: 760px) {
+  .table-wrap {
+    border-top-color: rgba(183, 92, 255, 0.22);
+  }
+
+  .table-wrap tr {
+    border-color: rgba(183, 92, 255, 0.24);
+    background: rgba(24, 7, 40, 0.88);
+  }
+
+  .table-wrap td {
+    border-bottom-color: rgba(183, 92, 255, 0.12);
+  }
+
+  .table-wrap td:first-child {
+    background: rgba(119, 35, 190, 0.26);
   }
 }
