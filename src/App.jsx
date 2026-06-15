@@ -17,7 +17,7 @@ function formatMoney(value) {
   return new Intl.NumberFormat('es-UY', {
     style: 'currency',
     currency: 'UYU',
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(value)
 }
 
@@ -87,8 +87,8 @@ function App() {
   )
   const [monthlyForcedRestDates, setMonthlyForcedRestDates] = useState(Array.from({ length: 12 }, () => []))
   const [monthlyForcedWorkDates, setMonthlyForcedWorkDates] = useState(Array.from({ length: 12 }, () => []))
-  const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(true))
-  const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(true))
+  const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(false))
+  const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(false))
   const [monthlyFloreria, setMonthlyFloreria] = useState(Array(12).fill(FLORERIA_MVD))
   const [monthlyTicketManual, setMonthlyTicketManual] = useState(Array(12).fill(''))
   const [newSpecialDate, setNewSpecialDate] = useState('')
@@ -550,7 +550,7 @@ function App() {
           </small>
         </section>
 
-        <section className="table-wrap">
+        <section className="table-wrap salary-table-wrap">
           <table>
             <thead>
               <tr>

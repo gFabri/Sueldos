@@ -61,6 +61,15 @@ select {
   outline: none;
 }
 
+input[type='number'],
+input[readonly] {
+  font-variant-numeric: tabular-nums;
+}
+
+input[type='number'] {
+  text-align: right;
+}
+
 input:focus,
 select:focus {
   border-color: #64a9ff;
@@ -86,6 +95,7 @@ input[type='checkbox'] {
 table {
   width: 100%;
   border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
 }
 
 th,
@@ -109,6 +119,35 @@ td {
   color: #e8f1ff;
 }
 
+.salary-table-wrap th:nth-child(3),
+.salary-table-wrap th:nth-child(4),
+.salary-table-wrap th:nth-child(5),
+.salary-table-wrap th:nth-child(6),
+.salary-table-wrap th:nth-child(7),
+.salary-table-wrap th:nth-child(8),
+.salary-table-wrap th:nth-child(9),
+.salary-table-wrap th:nth-child(10),
+.salary-table-wrap th:nth-child(11),
+.salary-table-wrap th:nth-child(12),
+.salary-table-wrap th:nth-child(13),
+.salary-table-wrap th:nth-child(14),
+.salary-table-wrap td:nth-child(3),
+.salary-table-wrap td:nth-child(4),
+.salary-table-wrap td:nth-child(5),
+.salary-table-wrap td:nth-child(6),
+.salary-table-wrap td:nth-child(7),
+.salary-table-wrap td:nth-child(8),
+.salary-table-wrap td:nth-child(9),
+.salary-table-wrap td:nth-child(10),
+.salary-table-wrap td:nth-child(11),
+.salary-table-wrap td:nth-child(12),
+.salary-table-wrap td:nth-child(13),
+.salary-table-wrap td:nth-child(14),
+.expense-table-wrap th:nth-child(4),
+.expense-table-wrap td:nth-child(4) {
+  text-align: right;
+}
+
 .capitalize {
   text-transform: capitalize;
 }
@@ -122,6 +161,8 @@ td {
 .salary {
   color: #89e5bc;
   font-weight: 700;
+  white-space: nowrap;
+  font-feature-settings: 'tnum';
 }
 
 .tabs-wrap {
@@ -348,6 +389,8 @@ td {
   .controls {
     grid-template-columns: 1fr;
     gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
 
   .tabs-wrap {
@@ -364,7 +407,7 @@ td {
 
   .month-editor {
     margin: 0 12px 12px;
-    padding: 10px;
+    padding: 12px;
   }
 
   .month-editor h2 {
@@ -373,17 +416,108 @@ td {
 
   .table-wrap {
     border-top: 1px solid rgba(129, 184, 255, 0.2);
+    overflow-x: visible;
   }
 
-  th,
-  td {
-    padding: 8px 9px;
-    font-size: 0.82rem;
+  .table-wrap table,
+  .table-wrap thead,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-wrap table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    padding: 0 10px 12px;
+  }
+
+  .table-wrap thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .table-wrap tr {
+    border: 1px solid rgba(129, 184, 255, 0.22);
+    border-radius: 10px;
+    background: rgba(8, 29, 57, 0.82);
+    overflow: hidden;
+  }
+
+  .table-wrap td {
+    min-height: 38px;
+    padding: 9px 10px;
+    border-bottom: 1px solid rgba(129, 184, 255, 0.11);
+    display: grid;
+    grid-template-columns: minmax(112px, 42%) minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    text-align: right;
+    font-size: 0.84rem;
+  }
+
+  .table-wrap td:last-child {
+    border-bottom: 0;
+  }
+
+  .table-wrap td::before {
+    color: #a7c6f0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  .salary-table-wrap td:nth-child(1)::before { content: 'Mes'; }
+  .salary-table-wrap td:nth-child(2)::before { content: 'Periodo'; }
+  .salary-table-wrap td:nth-child(3)::before { content: 'Descanso'; }
+  .salary-table-wrap td:nth-child(4)::before { content: 'Dias base'; }
+  .salary-table-wrap td:nth-child(5)::before { content: 'Descuento'; }
+  .salary-table-wrap td:nth-child(6)::before { content: 'Dias finales'; }
+  .salary-table-wrap td:nth-child(7)::before { content: 'Horas'; }
+  .salary-table-wrap td:nth-child(8)::before { content: 'Sueldo'; }
+  .salary-table-wrap td:nth-child(9)::before { content: 'Liquido'; }
+  .salary-table-wrap td:nth-child(10)::before { content: 'Floreria'; }
+  .salary-table-wrap td:nth-child(11)::before { content: 'Ticket'; }
+  .salary-table-wrap td:nth-child(12)::before { content: 'Presentismo'; }
+  .salary-table-wrap td:nth-child(13)::before { content: 'Total'; }
+  .salary-table-wrap td:nth-child(14)::before { content: 'Aguinaldo'; }
+
+  .expense-table-wrap td:nth-child(1)::before { content: 'Fecha'; }
+  .expense-table-wrap td:nth-child(2)::before { content: 'Categoria'; }
+  .expense-table-wrap td:nth-child(3)::before { content: 'Descripcion'; }
+  .expense-table-wrap td:nth-child(4)::before { content: 'Monto'; }
+  .expense-table-wrap td:nth-child(5)::before { content: 'Acciones'; }
+
+  .table-wrap td:first-child {
+    background: rgba(47, 106, 176, 0.18);
+    font-weight: 700;
+  }
+
+  .table-wrap td:first-child::before {
+    color: #d8e8ff;
+  }
+
+  .salary-table-wrap td:nth-child(1),
+  .salary-table-wrap td:nth-child(2),
+  .expense-table-wrap td:nth-child(1),
+  .expense-table-wrap td:nth-child(2),
+  .expense-table-wrap td:nth-child(3),
+  .expense-table-wrap td:nth-child(5) {
+    text-align: left;
   }
 
   .small-input {
     max-width: 100%;
     min-width: 70px;
+    justify-self: end;
+    text-align: right;
   }
 
   .schedule-grid {

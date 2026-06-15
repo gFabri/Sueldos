@@ -7,7 +7,7 @@ function formatMoney(value) {
   return new Intl.NumberFormat('es-UY', {
     style: 'currency',
     currency: 'UYU',
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
   }).format(value)
 }
 
@@ -151,7 +151,7 @@ function GestionPage() {
         </button>
       </section>
 
-      <section className="table-wrap">
+      <section className="table-wrap expense-table-wrap">
         <table>
           <thead>
             <tr>
