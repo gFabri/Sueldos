@@ -8,7 +8,6 @@ const DEFAULT_HOURS_PER_DAY = 8
 const JUBILACION_RATE = 0.15
 const FONASA_RATE = 0.045
 const FRL_RATE = 0.001
-const FLORERIA_MVD = 18
 const FOOD_TICKET_PER_160_HOURS = 1890.91
 const FOOD_TICKET_HOURS_BASE = 160
 const FOOD_TICKET_PER_HOUR = FOOD_TICKET_PER_160_HOURS / FOOD_TICKET_HOURS_BASE
@@ -95,7 +94,6 @@ function App() {
   const [monthlyForcedWorkDates, setMonthlyForcedWorkDates] = useState(Array.from({ length: 12 }, () => []))
   const [monthlyPresentismoLostQ1, setMonthlyPresentismoLostQ1] = useState(Array(12).fill(false))
   const [monthlyPresentismoLostQ2, setMonthlyPresentismoLostQ2] = useState(Array(12).fill(false))
-  const [monthlyFloreria, setMonthlyFloreria] = useState(Array(12).fill(FLORERIA_MVD))
   const [monthlyTicketManual, setMonthlyTicketManual] = useState(Array(12).fill(''))
   const [newSpecialDate, setNewSpecialDate] = useState('')
   const [newSpecialType, setNewSpecialType] = useState('rest')
@@ -157,8 +155,7 @@ function App() {
       const monthSalary = finalWorkDays * monthDailyPay
       const taxableSalary = monthSalary + presentismo
       const taxes = taxableSalary * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
-      const floreria = Math.max(0, Number(monthlyFloreria[monthIndex]) || 0)
-      const liquidSalary = Math.max(0, monthSalary - taxes - floreria)
+      const liquidSalary = Math.max(0, monthSalary - taxes)
       const ticketManual = Number(monthlyTicketManual[monthIndex]) || 0
       const foodTicket = ticketManual > 0 ? ticketManual : roundMoney(workedHours * FOOD_TICKET_PER_HOUR)
       const totalToCollect = liquidSalary + presentismo
@@ -182,7 +179,6 @@ function App() {
         monthSalary,
         liquidSalary,
         foodTicket,
-        floreria,
         presentismoEnabled,
         presentismo,
         totalToCollect,
@@ -219,7 +215,6 @@ function App() {
     employmentStartDate,
     monthlyPresentismoLostQ1,
     monthlyPresentismoLostQ2,
-    monthlyFloreria,
     monthlyTicketManual,
     hourlyRate,
     hoursPerDay,
@@ -299,14 +294,6 @@ function App() {
     setMonthlyPresentismoLostQ2((prev) => {
       const next = [...prev]
       next[monthIndex] = !next[monthIndex]
-      return next
-    })
-  }
-
-  const handleFloreriaChange = (index, value) => {
-    setMonthlyFloreria((prev) => {
-      const next = [...prev]
-      next[index] = value
       return next
     })
   }
@@ -462,17 +449,6 @@ function App() {
                 checked={monthlyPresentismoLostQ2[activeMonth]}
                 disabled={!activePeriod.presentismoEnabled}
                 onChange={() => togglePresentismoQ2(activeMonth)}
-              />
-            </label>
-
-            <label>
-              Florería del mes
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={monthlyFloreria[activeMonth]}
-                onChange={(e) => handleFloreriaChange(activeMonth, e.target.value)}
               />
             </label>
 
