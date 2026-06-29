@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import './App.css'
 import SchedulePage from './SchedulePage'
 import GestionPage from './GestionPage'
@@ -308,7 +309,7 @@ function App() {
 
   const activePeriod = periods[activeMonth]
   const nextAguinaldo = now.getMonth() <= 5 ? periods.cuotaJunio : periods.cuotaDiciembre
-  const isHorariosRoute = window.location.pathname.toLowerCase().startsWith('/horarios')
+  const isHorariosRoute = Capacitor.isNativePlatform() || window.location.pathname.toLowerCase().startsWith('/horarios')
   const isGestionRoute = window.location.pathname.toLowerCase().startsWith('/gestion')
 
   if (isHorariosRoute) {

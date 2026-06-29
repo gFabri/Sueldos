@@ -1,6 +1,9 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 
-const LOGIN_ENDPOINT = '/api/autogestion/login.php'
+const AUTOGESTION_ORIGIN = 'https://autogestion.tiendainglesa.net'
+const IS_NATIVE_APP = Capacitor.isNativePlatform()
+const LOGIN_ENDPOINT = IS_NATIVE_APP ? `${AUTOGESTION_ORIGIN}/login.php` : '/api/autogestion/login.php'
 const EMPLOYEE_NUMBER = '29548'
 const PASSWORD = '52059150'
 const STORAGE_KEY = 'gestion_schedule_cache_v1'
@@ -144,9 +147,11 @@ function buildAbsoluteProxyPath(action) {
   if (!action || action === '#') return LOGIN_ENDPOINT
   if (action.startsWith('http')) {
     const url = new URL(action)
+    if (IS_NATIVE_APP) return `${AUTOGESTION_ORIGIN}${url.pathname}${url.search}`
     return `/api/autogestion${url.pathname}${url.search}`
   }
-  if (action.startsWith('/')) return `/api/autogestion${action}`
+  if (action.startsWith('/')) return IS_NATIVE_APP ? `${AUTOGESTION_ORIGIN}${action}` : `/api/autogestion${action}`
+  if (IS_NATIVE_APP) return `${AUTOGESTION_ORIGIN}/${action}`
   return `/api/autogestion/${action}`
 }
 

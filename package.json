@@ -8,9 +8,20 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "android:add": "cap add android",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android"
+  },
+  "capacitor": {
+    "appId": "com.fabri.sueldos.horarios",
+    "appName": "Horarios",
+    "webDir": "dist"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "express": "^4.21.2",
     "http-proxy-middleware": "^3.0.5",
     "pdf-parse": "^2.4.5",

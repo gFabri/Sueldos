@@ -1,0 +1,14 @@
+{
+  "appId": "com.fabri.sueldos.horarios",
+  "appName": "Horarios",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
+}
