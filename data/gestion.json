@@ -1,1 +1,206 @@
-{}
+{
+  "__recurring": [
+    {
+      "id": 1782772652181,
+      "name": "Auto",
+      "category": "Servicios",
+      "amount": 7000,
+      "startMonth": "2026-06",
+      "endDate": "2030-12-01",
+      "createdAt": "2026-06-29T22:37:32.181Z"
+    },
+    {
+      "id": 1782772881757,
+      "name": "BSE",
+      "category": "Servicios",
+      "amount": 2285,
+      "startMonth": "2026-06",
+      "endDate": "2027-05-10",
+      "createdAt": "2026-06-29T22:41:21.757Z"
+    },
+    {
+      "id": 1782772915458,
+      "name": "Claro",
+      "category": "Servicios",
+      "amount": 420,
+      "startMonth": "2026-06",
+      "endDate": "2030-12-01",
+      "createdAt": "2026-06-29T22:41:55.458Z"
+    },
+    {
+      "id": 1782773048817,
+      "name": "PC",
+      "category": "Servicios",
+      "amount": 1500,
+      "startMonth": "2026-06",
+      "endDate": "2031-01-01",
+      "createdAt": "2026-06-29T22:44:08.817Z"
+    },
+    {
+      "id": 1782786641872,
+      "name": "Meli",
+      "category": "Tarjeta",
+      "amount": 200,
+      "startMonth": "2026-06",
+      "endDate": "2030-12-29",
+      "createdAt": "2026-06-30T02:30:41.872Z"
+    }
+  ],
+  "2026-06": {
+    "income": "",
+    "items": [
+      {
+        "id": 1782778522499,
+        "date": "2026-04-22",
+        "type": "card",
+        "category": "Tarjeta",
+        "description": "Electroventas Taladro",
+        "amount": 4425.96,
+        "installments": 6,
+        "installmentAmount": 737.66,
+        "firstInstallmentMonth": "2026-04",
+        "lastInstallmentMonth": "2026-09"
+      },
+      {
+        "id": 1782778565785,
+        "date": "2026-04-28",
+        "type": "card",
+        "category": "Tarjeta",
+        "description": "Magiccenter Mica",
+        "amount": 7380,
+        "installments": 12,
+        "installmentAmount": 615,
+        "firstInstallmentMonth": "2026-04",
+        "lastInstallmentMonth": "2027-03"
+      },
+      {
+        "id": 1782778634053,
+        "date": "2026-04-29",
+        "type": "card",
+        "category": "Tarjeta",
+        "description": "Mercadolibre",
+        "amount": 3336,
+        "installments": 6,
+        "installmentAmount": 556,
+        "firstInstallmentMonth": "2026-04",
+        "lastInstallmentMonth": "2026-09"
+      },
+      {
+        "id": 1782785356739,
+        "date": "2026-06-22",
+        "type": "card",
+        "category": "Tarjeta",
+        "description": "Cortina",
+        "amount": 2966,
+        "installments": 2,
+        "installmentAmount": 1483,
+        "closingDay": 7,
+        "firstInstallmentMonth": "2026-08",
+        "lastInstallmentMonth": "2026-09"
+      }
+    ],
+    "recurringStatus": {
+      "1782772652181": {
+        "paid": true,
+        "paidAt": "2026-06-29T22:37:38.314Z"
+      },
+      "1782772881757": {
+        "paid": true,
+        "paidAt": "2026-06-29T22:57:49.639Z"
+      },
+      "1782772915458": {
+        "paid": true,
+        "paidAt": "2026-06-29T22:41:56.571Z"
+      },
+      "1782773048817": {
+        "paid": true,
+        "paidAt": "2026-06-29T22:49:58.491Z"
+      },
+      "1782786641872": {
+        "paid": true,
+        "paidAt": "2026-06-30T02:30:44.468Z"
+      }
+    }
+  },
+  "__cards": [
+    {
+      "id": 1782778522499,
+      "date": "2026-04-22",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Electroventas Taladro",
+      "amount": 4425.96,
+      "installments": 6,
+      "installmentAmount": 737.66,
+      "firstInstallmentMonth": "2026-04",
+      "lastInstallmentMonth": "2026-09",
+      "legacyPeriod": "2026-06"
+    },
+    {
+      "id": 1782778565785,
+      "date": "2026-04-28",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Magiccenter Mica",
+      "amount": 7380,
+      "installments": 12,
+      "installmentAmount": 615,
+      "firstInstallmentMonth": "2026-04",
+      "lastInstallmentMonth": "2027-03",
+      "legacyPeriod": "2026-06"
+    },
+    {
+      "id": 1782778634053,
+      "date": "2026-04-29",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Mercadolibre",
+      "amount": 3336,
+      "installments": 6,
+      "installmentAmount": 556,
+      "firstInstallmentMonth": "2026-04",
+      "lastInstallmentMonth": "2026-09",
+      "legacyPeriod": "2026-06"
+    },
+    {
+      "id": 1782785356739,
+      "date": "2026-06-22",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Cortina",
+      "amount": 2966,
+      "installments": 2,
+      "installmentAmount": 1483,
+      "closingDay": 7,
+      "firstInstallmentMonth": "2026-08",
+      "lastInstallmentMonth": "2026-09",
+      "legacyPeriod": "2026-06"
+    },
+    {
+      "id": 1782785880087,
+      "date": "2026-06-16",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Amv Store",
+      "amount": 2269,
+      "installments": 6,
+      "installmentAmount": 378.17,
+      "closingDay": 7,
+      "firstInstallmentMonth": "2026-07",
+      "lastInstallmentMonth": "2026-12"
+    },
+    {
+      "id": 1782786421568,
+      "date": "2026-06-22",
+      "type": "card",
+      "category": "Tarjeta",
+      "description": "Tostadora",
+      "amount": 629,
+      "installments": 2,
+      "installmentAmount": 314.5,
+      "closingDay": 7,
+      "firstInstallmentMonth": "2026-07",
+      "lastInstallmentMonth": "2026-08"
+    }
+  ]
+}

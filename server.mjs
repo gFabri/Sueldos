@@ -42,11 +42,50 @@ app.use(
   }),
 )
 
+app.get('/api/gestion/recurring/list', (req, res) => {
+  const db = readGestionDb()
+  res.json(Array.isArray(db.__recurring) ? db.__recurring : [])
+})
+
+app.put('/api/gestion/recurring/list', (req, res) => {
+  const db = readGestionDb()
+  db.__recurring = Array.isArray(req.body) ? req.body : []
+  writeGestionDb(db)
+  res.json({ ok: true })
+})
+
+app.get('/api/gestion/cards/list', (req, res) => {
+  const db = readGestionDb()
+  if (Array.isArray(db.__cards)) {
+    res.json(db.__cards)
+    return
+  }
+
+  const cardsById = new Map()
+  Object.entries(db).forEach(([key, period]) => {
+    if (key.startsWith('__') || !Array.isArray(period?.items)) return
+    period.items
+      .filter((item) => item?.type === 'card')
+      .forEach((item) => {
+        cardsById.set(item.id, { ...item, legacyPeriod: key })
+      })
+  })
+
+  res.json([...cardsById.values()])
+})
+
+app.put('/api/gestion/cards/list', (req, res) => {
+  const db = readGestionDb()
+  db.__cards = Array.isArray(req.body) ? req.body : []
+  writeGestionDb(db)
+  res.json({ ok: true })
+})
+
 app.get('/api/gestion/:year/:month', (req, res) => {
   const { year, month } = req.params
   const key = `${year}-${String(month).padStart(2, '0')}`
   const db = readGestionDb()
-  res.json(db[key] || { income: '', items: [] })
+  res.json(db[key] || { income: '', items: [], recurringStatus: {} })
 })
 
 app.put('/api/gestion/:year/:month', (req, res) => {
@@ -56,6 +95,7 @@ app.put('/api/gestion/:year/:month', (req, res) => {
   const next = {
     income: payload.income ?? '',
     items: Array.isArray(payload.items) ? payload.items : [],
+    recurringStatus: payload.recurringStatus && typeof payload.recurringStatus === 'object' ? payload.recurringStatus : {},
   }
   const db = readGestionDb()
   db[key] = next
