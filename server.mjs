@@ -12,6 +12,8 @@ const port = process.env.PORT || 8081
 const distPath = path.join(__dirname, 'dist')
 const dataDir = path.join(__dirname, 'data')
 const gestionFile = path.join(dataDir, 'gestion.json')
+const packageFile = path.join(__dirname, 'package.json')
+const versionFile = path.join(distPath, 'version.json')
 
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true })
 if (!fs.existsSync(gestionFile)) fs.writeFileSync(gestionFile, '{}', 'utf8')
@@ -26,6 +28,22 @@ const readGestionDb = () => {
 
 const writeGestionDb = (db) => {
   fs.writeFileSync(gestionFile, JSON.stringify(db, null, 2), 'utf8')
+}
+
+const readJsonFile = (filePath, fallback) => {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8') || '{}')
+  } catch {
+    return fallback
+  }
+}
+
+const getAppVersion = () => {
+  if (process.env.APP_VERSION) return process.env.APP_VERSION
+  const buildInfo = readJsonFile(versionFile, null)
+  if (buildInfo?.version) return buildInfo.version
+  const packageInfo = readJsonFile(packageFile, { version: '0.0.0' })
+  return `${packageInfo.version || '0.0.0'}-dev`
 }
 
 app.use(express.json())
@@ -103,8 +121,20 @@ app.put('/api/gestion/:year/:month', (req, res) => {
   res.json({ ok: true })
 })
 
+app.get('/api/version', (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  res.json({ version: getAppVersion() })
+})
+
 app.use((req, res, next) => {
-  if (req.path === '/' || req.path === '/horarios' || req.path === '/gestion' || req.path.endsWith('.html')) {
+  if (
+    req.path === '/' ||
+    req.path === '/horarios' ||
+    req.path === '/gestion' ||
+    req.path === '/favicon.svg' ||
+    req.path === '/version.json' ||
+    req.path.endsWith('.html')
+  ) {
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     res.setHeader('Pragma', 'no-cache')
     res.setHeader('Expires', '0')
@@ -120,5 +150,5 @@ app.get('*', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Gestion app listening on ${port}`)
+  console.log(`Gestion app v${getAppVersion()} listening on ${port}`)
 })
