@@ -21,8 +21,10 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,9 +78,8 @@ public class ScheduleCheckWorker extends Worker {
     }
 
     private String loginAndFetchHtml() throws Exception {
-        List<String> cookies = new ArrayList<>();
+        Map<String, String> cookies = new LinkedHashMap<>();
         HttpResult loginPage = request("GET", LOGIN_URL, null, null, cookies);
-        cookies.addAll(loginPage.cookies);
 
         String action = findFormAction(loginPage.body);
         String loginActionUrl = buildAbsoluteUrl(action);
@@ -92,12 +93,16 @@ public class ScheduleCheckWorker extends Worker {
                 cookies
         );
 
+        if (response.isRedirect() && response.location != null) {
+            response = request("GET", buildAbsoluteUrl(response.location), null, null, cookies);
+        }
+
         return response.body;
     }
 
-    private HttpResult request(String method, String urlValue, String body, String contentType, List<String> cookies) throws Exception {
+    private HttpResult request(String method, String urlValue, String body, String contentType, Map<String, String> cookies) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) new URL(urlValue).openConnection();
-        connection.setInstanceFollowRedirects(true);
+        connection.setInstanceFollowRedirects(false);
         connection.setRequestMethod(method);
         connection.setConnectTimeout(15000);
         connection.setReadTimeout(20000);
@@ -105,7 +110,11 @@ public class ScheduleCheckWorker extends Worker {
         connection.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
 
         if (!cookies.isEmpty()) {
-            connection.setRequestProperty("Cookie", String.join("; ", cookies));
+            List<String> cookiePairs = new ArrayList<>();
+            for (Map.Entry<String, String> cookie : cookies.entrySet()) {
+                cookiePairs.add(cookie.getKey() + "=" + cookie.getValue());
+            }
+            connection.setRequestProperty("Cookie", String.join("; ", cookiePairs));
         }
 
         if (body != null) {
@@ -118,19 +127,24 @@ public class ScheduleCheckWorker extends Worker {
             }
         }
 
-        List<String> nextCookies = new ArrayList<>();
         List<String> setCookieHeaders = connection.getHeaderFields().get("Set-Cookie");
         if (setCookieHeaders != null) {
             for (String setCookie : setCookieHeaders) {
                 int end = setCookie.indexOf(';');
-                nextCookies.add(end >= 0 ? setCookie.substring(0, end) : setCookie);
+                String pair = end >= 0 ? setCookie.substring(0, end) : setCookie;
+                int separator = pair.indexOf('=');
+                if (separator > 0) {
+                    cookies.put(pair.substring(0, separator), pair.substring(separator + 1));
+                }
             }
         }
 
-        InputStream stream = connection.getResponseCode() >= 400 ? connection.getErrorStream() : connection.getInputStream();
+        int responseCode = connection.getResponseCode();
+        String location = connection.getHeaderField("Location");
+        InputStream stream = responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream();
         String responseBody = readStream(stream);
         connection.disconnect();
-        return new HttpResult(responseBody, nextCookies);
+        return new HttpResult(responseBody, responseCode, location);
     }
 
     private String buildLoginBody(String loginHtml) throws Exception {
@@ -145,8 +159,6 @@ public class ScheduleCheckWorker extends Worker {
             parts.add(encode(name) + "=" + encode(value == null ? "" : value));
         }
 
-        parts.add("usuario=" + encode(EMPLOYEE_NUMBER));
-        parts.add("clave=" + encode(PASSWORD));
         parts.add("numero=" + encode(EMPLOYEE_NUMBER));
         parts.add("pass=" + encode(PASSWORD));
         return String.join("&", parts);
@@ -182,6 +194,25 @@ public class ScheduleCheckWorker extends Worker {
         }
 
         List<WeekBlock> weekBlocks = new ArrayList<>();
+        Matcher modernWeekMatcher = Pattern.compile("<article[^>]*class=[\"'][^\"']*week[^\"']*[\"'][^>]*>(.*?)</article>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+                .matcher(html);
+        while (modernWeekMatcher.find()) {
+            String weekHtml = modernWeekMatcher.group(1);
+            List<String> dayNumbers = new ArrayList<>();
+            List<String> values = new ArrayList<>();
+            Matcher dayMatcher = Pattern.compile("<div[^>]*class=[\"']day[\"'][^>]*>(.*?)</div>\\s*</div>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+                    .matcher(weekHtml);
+            while (dayMatcher.find()) {
+                String dayHtml = dayMatcher.group(1);
+                String dayName = extractFirstClassText(dayHtml, "day__name");
+                String shift = extractFirstClassText(dayHtml, "day__shift");
+                Matcher numberMatcher = Pattern.compile("(\\d{1,2})\\s*$").matcher(dayName);
+                dayNumbers.add(numberMatcher.find() ? String.format(Locale.ROOT, "%02d", Integer.parseInt(numberMatcher.group(1))) : "");
+                values.add(shift);
+            }
+            if (values.size() == 7) weekBlocks.add(new WeekBlock(dayNumbers, values));
+        }
+
         Pattern rowPattern = Pattern.compile("<tr[^>]*>(.*?)</tr>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
         Matcher rowMatcher = rowPattern.matcher(html);
         List<String> rows = new ArrayList<>();
@@ -223,6 +254,12 @@ public class ScheduleCheckWorker extends Worker {
                 .replaceAll("(?i)FECHA ACTUAL:\\s*\\d{1,2}-\\d{1,2}-\\d{4}", "")
                 .replaceAll("\\s+", " ")
                 .trim();
+    }
+
+    private String extractFirstClassText(String html, String className) {
+        Pattern pattern = Pattern.compile("<[^>]*class=[\"'][^\"']*" + Pattern.quote(className) + "[^\"']*[\"'][^>]*>(.*?)</[^>]+>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(html == null ? "" : html);
+        return matcher.find() ? stripTags(matcher.group(1)).replaceAll("\\s+", " ").trim() : "";
     }
 
     private List<String> extractCells(String rowHtml, String tag) {
@@ -285,6 +322,8 @@ public class ScheduleCheckWorker extends Worker {
     }
 
     private void showScheduleNotification() {
+        ScheduleWorkScheduler.createNotificationChannel(getApplicationContext());
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -294,7 +333,7 @@ public class ScheduleCheckWorker extends Worker {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), MainActivity.NOTIFICATION_CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), ScheduleWorkScheduler.NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(getApplicationContext().getApplicationInfo().icon)
                 .setContentTitle("Horarios actualizados")
                 .setContentText("Se detecto un cambio en la semana siguiente.")
@@ -311,11 +350,17 @@ public class ScheduleCheckWorker extends Worker {
 
     private static class HttpResult {
         final String body;
-        final List<String> cookies;
+        final int statusCode;
+        final String location;
 
-        HttpResult(String body, List<String> cookies) {
+        HttpResult(String body, int statusCode, String location) {
             this.body = body;
-            this.cookies = cookies;
+            this.statusCode = statusCode;
+            this.location = location;
+        }
+
+        boolean isRedirect() {
+            return statusCode >= 300 && statusCode < 400;
         }
     }
 

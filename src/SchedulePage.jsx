@@ -55,6 +55,39 @@ function parseScheduleFromHtml(html) {
   const weekDays = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
   const currentDateText = (doc.body?.innerText || '').match(/FECHA ACTUAL:\s*(\d{1,2})-(\d{1,2})-(\d{4})/i)
   const currentDay = currentDateText ? String(currentDateText[1]).padStart(2, '0') : null
+  const modernWeeks = [...doc.querySelectorAll('.week')]
+    .map((week) => {
+      const rows = [...week.querySelectorAll('.day')].map((dayEl, index) => {
+        const dayName = (dayEl.querySelector('.day__name')?.textContent || weekDays[index] || '').replace(/\s+/g, ' ').trim()
+        const rawShift = (dayEl.querySelector('.day__shift')?.textContent || '').replace(/\s+/g, ' ').trim()
+        const formatted = formatShift(rawShift)
+        return {
+          day: dayName || weekDays[index],
+          shift: formatted.shift,
+          hours: formatted.hours,
+          isRest: formatted.isRest,
+        }
+      })
+
+      const dayNumbers = rows.map((row) => row.day.match(/\d{1,2}$/)?.[0]?.padStart(2, '0') || null)
+      return rows.length === 7 ? { rows, dayNumbers } : null
+    })
+    .filter(Boolean)
+
+  if (modernWeeks.length > 0) {
+    const currentDayNum = currentDay ? Number(currentDay) : null
+    const currentIndex = modernWeeks.findIndex(
+      (w) =>
+        currentDayNum !== null &&
+        w.dayNumbers.some((d) => d !== null && Number(d) === currentDayNum),
+    )
+    const selectedIndex = currentIndex >= 0 ? currentIndex : 0
+
+    return {
+      currentWeek: modernWeeks[selectedIndex]?.rows || [...DEFAULT_DAYS],
+      nextWeek: modernWeeks[selectedIndex + 1]?.rows || [...DEFAULT_DAYS],
+    }
+  }
 
   const schedulesHeader = [...doc.querySelectorAll('h3')].find((h) =>
     (h.textContent || '').toUpperCase().includes('HORARIOS'),
@@ -215,8 +248,8 @@ async function loginAndFetchHtml() {
 
   formData.set(userField, EMPLOYEE_NUMBER)
   formData.set(passField, PASSWORD)
-  formData.set('usuario', EMPLOYEE_NUMBER)
-  formData.set('clave', PASSWORD)
+  if (userField !== 'numero') formData.set('usuario', EMPLOYEE_NUMBER)
+  if (passField !== 'pass') formData.set('clave', PASSWORD)
 
   const loginSubmitResponse = await fetch(action, {
     method: 'POST',
