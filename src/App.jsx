@@ -9,7 +9,8 @@ const DEFAULT_HOURS_PER_DAY = 8
 const JUBILACION_RATE = 0.15
 const FONASA_RATE = 0.045
 const FRL_RATE = 0.001
-const FOOD_TICKET_PER_160_HOURS = 1890.91
+const HOURLY_RATE_STORAGE_KEY = 'salary_hourly_rate'
+const FOOD_TICKET_PER_160_HOURS = 1944
 const FOOD_TICKET_HOURS_BASE = 160
 const FOOD_TICKET_PER_HOUR = FOOD_TICKET_PER_160_HOURS / FOOD_TICKET_HOURS_BASE
 const PRESENTISMO_PER_HALF = 1350
@@ -43,8 +44,13 @@ function parseIsoDate(value) {
   return new Date(y, m - 1, d)
 }
 
-function getPeriodStart(year, monthIndex) {
-  return new Date(year, monthIndex - 1, 26)
+function getStoredNumber(key, fallback) {
+  const value = Number(localStorage.getItem(key))
+  return Number.isFinite(value) && value > 0 ? value : fallback
+}
+
+function getPaidPeriodStart(year, paymentMonthIndex) {
+  return new Date(year, paymentMonthIndex - 2, 26)
 }
 
 function getPeriodEndExclusive(start) {
@@ -83,7 +89,7 @@ function App() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [employmentStartDate, setEmploymentStartDate] = useState('2026-02-12')
-  const [hourlyRate, setHourlyRate] = useState(DEFAULT_HOURLY_RATE)
+  const [hourlyRate, setHourlyRate] = useState(() => getStoredNumber(HOURLY_RATE_STORAGE_KEY, DEFAULT_HOURLY_RATE))
   const [hoursPerDay, setHoursPerDay] = useState(DEFAULT_HOURS_PER_DAY)
   const [activeMonth, setActiveMonth] = useState(now.getMonth())
   const [monthlyUnpaidDays, setMonthlyUnpaidDays] = useState(Array(12).fill(0))
@@ -117,7 +123,7 @@ function App() {
     ]
 
     const rows = Array.from({ length: 12 }, (_, monthIndex) => {
-      const start = getPeriodStart(Number(year), monthIndex)
+      const start = getPaidPeriodStart(Number(year), monthIndex)
       const endExclusive = getPeriodEndExclusive(start)
       const endVisible = new Date(endExclusive)
       endVisible.setDate(endVisible.getDate() - 1)
@@ -164,7 +170,8 @@ function App() {
 
       return {
         key: `${year}-${monthIndex}`,
-        label: endVisible.toLocaleDateString('es-UY', { month: 'long' }),
+        label: new Date(Number(year), monthIndex, 1).toLocaleDateString('es-UY', { month: 'long' }),
+        workedMonthLabel: endVisible.toLocaleDateString('es-UY', { month: 'long' }),
         periodText: `${formatDate(start)} al ${formatDate(endVisible)}`,
         startIso,
         endIso,
@@ -307,6 +314,11 @@ function App() {
     })
   }
 
+  const handleHourlyRateChange = (value) => {
+    setHourlyRate(value)
+    localStorage.setItem(HOURLY_RATE_STORAGE_KEY, String(value))
+  }
+
   const activePeriod = periods[activeMonth]
   const nextAguinaldo = now.getMonth() <= 5 ? periods.cuotaJunio : periods.cuotaDiciembre
   const isHorariosRoute = Capacitor.isNativePlatform() || window.location.pathname.toLowerCase().startsWith('/horarios')
@@ -336,7 +348,7 @@ function App() {
       <section className="panel">
         <header className="header">
           <h1>Calculadora de Sueldo Mes a Mes</h1>
-          <p>Períodos: del 26 al 25 siguiente (26 del siguiente mes exclusivo).</p>
+          <p>Cobros por mes: cada mes muestra el período trabajado anterior, del 26 al 25.</p>
         </header>
 
         <div className="controls">
@@ -367,7 +379,7 @@ function App() {
               min="0"
               step="0.01"
               value={hourlyRate}
-              onChange={(e) => setHourlyRate(e.target.value)}
+              onChange={(e) => handleHourlyRateChange(e.target.value)}
             />
           </label>
 
@@ -408,7 +420,7 @@ function App() {
 
         <section className="month-editor">
           <h2 className="capitalize">Edición manual: {activePeriod.label}</h2>
-          <p>{activePeriod.periodText}</p>
+          <p className="capitalize">Cobro de {activePeriod.workedMonthLabel}: {activePeriod.periodText}</p>
           <div className="editor-grid">
             <label>
               Descuento opcional de días no pagos

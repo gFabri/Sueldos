@@ -10,6 +10,7 @@ const FRL_RATE = 0.001
 const PRESENTISMO_PER_HALF = 1350
 const EMPLOYMENT_START_DATE = '2026-02-12'
 const DEFAULT_REST_DAYS = [true, true, false, false, false, false, false]
+const HOURLY_RATE_STORAGE_KEY = 'salary_hourly_rate'
 const KNOWN_LIQUID_INCOME_BY_MONTH = {
   '2026-02': 14243,
   '2026-03': 21919,
@@ -131,8 +132,13 @@ function parseIsoDate(value) {
   return new Date(y, m - 1, d)
 }
 
-function getPeriodStart(year, monthIndex) {
-  return new Date(year, monthIndex - 1, 26)
+function getStoredNumber(key, fallback) {
+  const value = Number(localStorage.getItem(key))
+  return Number.isFinite(value) && value > 0 ? value : fallback
+}
+
+function getPaidPeriodStart(year, paymentMonthIndex) {
+  return new Date(year, paymentMonthIndex - 2, 26)
 }
 
 function getPeriodEndExclusive(start) {
@@ -147,7 +153,7 @@ function getAutomaticIncome(year, monthIndex) {
   const monthKey = formatMonthKey(year, monthIndex)
   if (KNOWN_LIQUID_INCOME_BY_MONTH[monthKey] !== undefined) return KNOWN_LIQUID_INCOME_BY_MONTH[monthKey]
 
-  const start = getPeriodStart(year, monthIndex)
+  const start = getPaidPeriodStart(year, monthIndex)
   const endExclusive = getPeriodEndExclusive(start)
   const endVisible = new Date(endExclusive)
   endVisible.setDate(endVisible.getDate() - 1)
@@ -163,7 +169,7 @@ function getAutomaticIncome(year, monthIndex) {
   }
 
   const workedHours = workDays * DEFAULT_HOURS_PER_DAY
-  const monthSalary = workedHours * DEFAULT_HOURLY_RATE
+  const monthSalary = workedHours * getStoredNumber(HOURLY_RATE_STORAGE_KEY, DEFAULT_HOURLY_RATE)
   const presentismoEnabled = monthDiff(employmentStart, endVisible) >= 2
   const presentismo = presentismoEnabled ? PRESENTISMO_PER_HALF * 2 : 0
   const taxes = (monthSalary + presentismo) * (JUBILACION_RATE + FONASA_RATE + FRL_RATE)
