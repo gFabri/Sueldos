@@ -1,7 +1,13 @@
 ﻿services:
   gestion-app:
     build: .
-    container_name: gestion-app
+    container_name: gestion-app-container
     ports:
       - "8080:8080"
     restart: unless-stopped
+    networks:
+      - custom
+
+networks:
+  custom:
+    external: true
